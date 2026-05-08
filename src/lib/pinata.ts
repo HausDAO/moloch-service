@@ -1,3 +1,4 @@
+import { PinataSDK } from 'pinata';
 import type { AppConfig } from '../config.js';
 import { HttpError } from './http-errors.js';
 
@@ -33,25 +34,21 @@ export async function pinJson(config: AppConfig, input: PinJsonInput): Promise<P
     throw new HttpError(503, 'Pinning is not configured. Set PINATA_JWT.');
   }
 
-  const name = normalizeJsonName(input.name || `moloch-artifact-${Date.now()}.json`);
-  const json = JSON.stringify(input.data, null, 2);
-  const form = new FormData();
-  form.append('file', new Blob([json], { type: 'application/json' }), name);
-
-  const response = await fetch('https://uploads.pinata.cloud/v3/files', {
-    method: 'POST',
-    headers: {
-      authorization: `Bearer ${config.pinataJwt}`,
-    },
-    body: form,
+  const pinata = new PinataSDK({
+    pinataJwt: config.pinataJwt,
+    pinataGateway: gatewayHost(config.ipfsGatewayUrl),
   });
 
-  if (!response.ok) {
-    const text = await response.text();
-    throw new HttpError(response.status, `Pinata v3 file upload failed: ${text}`);
+  let body: PinataResponse;
+  try {
+    body = await pinata.upload.public
+      .json(toJsonObject(input.data))
+      .name(normalizeJsonName(input.name || `moloch-artifact-${Date.now()}.json`)) as PinataResponse;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new HttpError(502, `Pinata v3 JSON upload failed: ${message}`);
   }
 
-  const body = await response.json() as PinataResponse;
   return {
     id: body.id,
     name: body.name,
@@ -68,4 +65,14 @@ export async function pinJson(config: AppConfig, input: PinJsonInput): Promise<P
 function normalizeJsonName(name: string): string {
   const trimmed = name.trim() || `moloch-artifact-${Date.now()}.json`;
   return trimmed.toLowerCase().endsWith('.json') ? trimmed : `${trimmed}.json`;
+}
+
+function gatewayHost(gatewayUrl: string): string {
+  const url = new URL(gatewayUrl);
+  return url.host;
+}
+
+function toJsonObject(value: unknown): object {
+  if (value !== null && typeof value === 'object') return value;
+  return { value };
 }
