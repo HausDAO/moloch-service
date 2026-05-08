@@ -10,6 +10,12 @@ test('getConfig applies service defaults', () => {
   assert.equal(config.ipfsGatewayUrl, 'https://gateway.pinata.cloud/ipfs/');
 });
 
+test('getConfig normalizes dedicated Pinata gateway hosts', () => {
+  const config = getConfig({ IPFS_GATEWAY_URL: 'dark-factory.mypinata.cloud' });
+
+  assert.equal(config.ipfsGatewayUrl, 'https://dark-factory.mypinata.cloud/ipfs/');
+});
+
 test('graphEndpoint prefers GRAPH_URL', () => {
   assert.equal(graphEndpoint({ graphUrl: 'https://example.test/subgraph' }), 'https://example.test/subgraph');
 });

@@ -36,5 +36,8 @@ export function graphEndpoint(config: Pick<AppConfig, 'graphUrl' | 'graphApiKey'
 }
 
 function normalizeGateway(value: string): string {
-  return value.endsWith('/') ? value : `${value}/`;
+  const withProtocol = /^https?:\/\//.test(value) ? value : `https://${value}`;
+  const withoutTrailingSlash = withProtocol.replace(/\/+$/, '');
+  const withIpfsPath = /\/ipfs$/i.test(withoutTrailingSlash) ? withoutTrailingSlash : `${withoutTrailingSlash}/ipfs`;
+  return `${withIpfsPath}/`;
 }

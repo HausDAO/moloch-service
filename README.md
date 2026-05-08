@@ -8,7 +8,7 @@ The service removes operator-facing Graph and Pinata secrets from the agent runt
 
 - Proxies DAOhaus Base subgraph reads.
 - Provides stable DAO/proposal/member/record endpoints.
-- Pins public JSON artifacts to IPFS through Pinata.
+- Pins public JSON artifacts to IPFS through Pinata v3 uploads.
 - Reports capabilities for agent bootstrap.
 
 ## What It Does Not Do
@@ -30,7 +30,7 @@ PINATA_JWT=...
 IPFS_GATEWAY_URL=https://gateway.pinata.cloud/ipfs/
 ```
 
-`GRAPH_API_KEY` or `GRAPH_URL` is required for Graph routes. `PINATA_JWT` is required for pinning routes.
+`GRAPH_API_KEY` or `GRAPH_URL` is required for Graph routes. `PINATA_JWT` is required for pinning routes. `IPFS_GATEWAY_URL` may be a full `/ipfs/` gateway URL or a Pinata dedicated gateway host; the service normalizes it to an `/ipfs/` URL.
 
 ## Install
 
@@ -103,6 +103,8 @@ curl -X POST http://localhost:3000/graph/query \
 
 ### Pin JSON
 
+Uses Pinata v3 file uploads at `https://uploads.pinata.cloud/v3/files`. JSON is uploaded as a public `.json` file.
+
 ```bash
 curl -X POST http://localhost:3000/pin/json \
   -H 'content-type: application/json' \
@@ -117,7 +119,7 @@ Response:
   "uri": "ipfs://bafy...",
   "gatewayUrl": "https://gateway.pinata.cloud/ipfs/bafy...",
   "size": 123,
-  "timestamp": "..."
+  "mimeType": "application/json"
 }
 ```
 
@@ -130,4 +132,3 @@ MOLOCH_SERVICE_URL=https://moloch-agent-api.hausdao.org
 ```
 
 Operators should only need to provide wallet/signer configuration for local signing.
-
