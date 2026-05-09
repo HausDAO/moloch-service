@@ -30,10 +30,8 @@ const PROPOSAL_FIELDS = gql`
     createdAt
     createdBy
     sponsored
-    sponsoredAt
     sponsor
     processed
-    processedAt
     cancelled
     passed
     actionFailed
