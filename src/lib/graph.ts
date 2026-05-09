@@ -19,7 +19,6 @@ const DAO_FIELDS = gql`
     quorumPercent
     minRetentionPercent
     sponsorThreshold
-    newOffering
   }
 `;
 
@@ -59,8 +58,6 @@ const MEMBER_FIELDS = gql`
     loot
     delegateShares
     delegateOf
-    exists
-    jailed
     createdAt
   }
 `;
